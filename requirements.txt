@@ -1,0 +1,2 @@
+# Opcional: solo necesario con --nmap (además del binario nmap instalado en el sistema)
+python-nmap>=0.7.1

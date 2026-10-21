@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reporte CyberShield</title>
+<style>
+:root{
+  --bg:#f4f6f8; --panel:#ffffff; --ink:#14202b; --muted:#5b6b7a; --line:#d8e0e7; --accent:#1f5f8b;
+  --critical:#b3261e; --high:#cf5a14; --medium:#b88a00; --low:#2f7ba5; --info:#6b7785;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e151c; --panel:#16202a; --ink:#e4eaf0; --muted:#93a2b1; --line:#2a3846; --accent:#6fb3e0;
+    --critical:#ff6b60; --high:#ff9248; --medium:#e6b93a; --low:#5eb4e0; --info:#8d9aa8; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --panel:#16202a; --ink:#e4eaf0; --muted:#93a2b1; --line:#2a3846; --accent:#6fb3e0;
+  --critical:#ff6b60; --high:#ff9248; --medium:#e6b93a; --low:#5eb4e0; --info:#8d9aa8; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:22px}
+h1{font-size:1.6rem;margin:0;letter-spacing:-.01em}
+h2{font-size:1.1rem;margin:34px 0 12px}
+.muted{color:var(--muted)}
+.sub{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+button,select,input{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 11px}
+button{cursor:pointer}
+button:hover{border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.facts{display:flex;flex-wrap:wrap;gap:6px 28px;margin:0 0 18px}
+.facts div{display:flex;flex-direction:column}
+.facts b{font-size:1.5rem;line-height:1.2}
+.facts span{color:var(--muted);font-size:.85rem}
+.strip{display:flex;height:46px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+.strip button{flex:var(--n) 1 0;min-width:0;border:0;border-radius:0;color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 6px}
+.strip button[data-sev=medium],.strip button[data-sev=low]{color:#10151a}
+.strip button.off{opacity:.28}
+.strip .empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 0}
+.tools input{flex:1;min-width:200px}
+.f{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--info);border-radius:6px;margin-bottom:8px}
+.f.critical{border-left-color:var(--critical)}.f.high{border-left-color:var(--high)}
+.f.medium{border-left-color:var(--medium)}.f.low{border-left-color:var(--low)}
+.f summary{cursor:pointer;padding:11px 14px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline}
+.f summary b{flex:1 1 320px}
+.f .body{padding:0 14px 12px;border-top:1px solid var(--line)}
+.f .body p{margin:10px 0 0}
+.badge{font-size:.78rem;font-weight:600;padding:1px 9px;border-radius:99px;border:1px solid currentColor}
+.badge.critical{color:var(--critical)}.badge.high{color:var(--high)}.badge.medium{color:var(--medium)}
+.badge.low{color:var(--low)}.badge.info{color:var(--info)}
+.wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:720px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{cursor:pointer;white-space:nowrap;font-weight:600;user-select:none}
+th[aria-sort]::after{content:" ▲";font-size:.7em;color:var(--accent)}
+th[aria-sort=descending]::after{content:" ▼"}
+tr:last-child td{border-bottom:0}
+code,.mono{font-family:var(--mono);font-size:.85em}
+td.bn{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.score{display:inline-block;min-width:2.4em;text-align:center;font-weight:700}
+footer{margin-top:40px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Reporte de vulnerabilidades</h1>
+      <p class="sub" id="meta"></p>
+    </div>
+    <div>
+      <button id="theme" type="button">Cambiar tema</button>
+      <button id="dl" type="button">Descargar JSON</button>
+    </div>
+  </header>
+
+  <section class="facts" id="facts" aria-label="Resumen"></section>
+  <div class="strip" id="strip" role="group" aria-label="Filtrar por severidad"></div>
+
+  <div class="tools">
+    <input id="q" type="search" placeholder="Buscar por servicio, CVE, host, banner…" aria-label="Buscar">
+    <select id="host" aria-label="Host"></select>
+  </div>
+
+  <h2>Hallazgos <span class="muted" id="fcount"></span></h2>
+  <div id="findings"></div>
+
+  <h2>Puertos abiertos <span class="muted" id="pcount"></span></h2>
+  <div class="wrap"><table>
+    <thead><tr id="thead"></tr></thead>
+    <tbody id="ports"></tbody>
+  </table></div>
+
+  <footer>Herramienta de uso autorizado. Los hallazgos se basan en banners y heurísticas: confirma cada uno manualmente antes de actuar.</footer>
+</main>
+
+<script>
+const D = {"tool": "CyberShield Scanner", "version": "1.0.0", "generated_at": "2026-10-20T23:57:38+00:00", "scan": {"threads": 200, "timeout_s": 1.0, "duration_s": 1.62, "nmap": true, "interrupted": false, "targets": ["scanme.nmap.org"], "ports_scanned": 1024}, "summary": {"hosts": 1, "hosts_with_open_ports": 1, "open_ports": 2, "findings": 2, "by_severity": {"critical": 0, "high": 0, "medium": 2, "low": 0, "info": 0}, "max_risk_score": 16}, "hosts": [{"host": "scanme.nmap.org", "ip": "45.33.32.156", "open_ports": [{"host": "scanme.nmap.org", "ip": "45.33.32.156", "port": 22, "service": "ssh", "banner": "SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13", "components": [{"product": "OpenSSH", "version": "6.6.1p1"}], "source": "socket"}, {"host": "scanme.nmap.org", "ip": "45.33.32.156", "port": 80, "service": "http", "banner": "HTTP/1.1 200 OK\r\nDate: Tue, 20 Oct 2026 23:57:36 GMT\r\nServer: Apache/2.4.7 (Ubuntu)\r\nAccept-Ranges: bytes\r\nVary: Accept-Encoding\r\nConnection: close\r\nContent-Type: text/html", "components": [{"product": "Apache httpd", "version": "2.4.7"}], "source": "socket"}], "findings": [{"host": "scanme.nmap.org", "ip": "45.33.32.156", "port": 22, "severity": "medium", "title": "OpenSSH obsoleto (sin soporte)", "category": "versión", "cve": "", "detail": "Detectado OpenSSH 6.6.1p1 en 22/tcp.", "advice": "Actualiza a una versión mantenida de OpenSSH."}, {"host": "scanme.nmap.org", "ip": "45.33.32.156", "port": 80, "severity": "medium", "title": "Apache httpd obsoleto con vulnerabilidades públicas conocidas", "category": "versión", "cve": "", "detail": "Detectado Apache httpd 2.4.7 en 80/tcp.", "advice": "Actualiza a la última versión estable 2.4.x."}], "risk_score": 16}]};
+const SEV = ["critical","high","medium","low","info"];
+const LBL = {critical:"Crítica",high:"Alta",medium:"Media",low:"Baja",info:"Info"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const S = {sev:new Set(SEV), q:"", host:"all", key:"port", dir:1};
+const findings = D.hosts.flatMap(h => h.findings);
+const ports = D.hosts.flatMap(h => h.open_ports).map(p => ({
+  ...p,
+  product: p.components.map(c => (c.product + " " + c.version).trim()).join(", ")
+}));
+const COLS = [["host","Host"],["port","Puerto"],["service","Servicio"],["product","Producto / versión"],["source","Fuente"],["banner","Banner"]];
+
+const hit = (...fields) => !S.q || fields.join(" ").toLowerCase().includes(S.q);
+const hostOk = h => S.host === "all" || h === S.host;
+
+function renderHead(){
+  $("#meta").textContent = `${D.scan.targets.join(", ")} · ${D.scan.ports_scanned} puertos · ${D.scan.threads} hilos · ${D.scan.duration_s}s · ${D.generated_at}`;
+  const s = D.summary;
+  $("#facts").innerHTML = [
+    [s.hosts, "hosts analizados"], [s.open_ports, "puertos abiertos"],
+    [s.findings, "hallazgos"], [s.max_risk_score + "/100", "riesgo máximo"]
+  ].map(([n,l]) => `<div><b>${esc(n)}</b><span>${l}</span></div>`).join("");
+  const sel = $("#host");
+  sel.innerHTML = `<option value="all">Todos los hosts</option>` +
+    D.hosts.map(h => `<option value="${esc(h.host)}">${esc(h.host)} (${h.risk_score}/100)</option>`).join("");
+}
+
+function renderStrip(){
+  const c = D.summary.by_severity;
+  const active = SEV.filter(s => c[s] > 0);
+  $("#strip").innerHTML = active.length ? active.map(s =>
+    `<button type="button" data-sev="${s}" class="${S.sev.has(s) ? "" : "off"}" style="--n:${c[s]};background:var(--${s})" aria-pressed="${S.sev.has(s)}">${LBL[s]} ${c[s]}</button>`
+  ).join("") : `<div class="empty">Sin hallazgos: no se detectaron puertos o versiones de riesgo.</div>`;
+  $("#strip").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const s = b.dataset.sev; S.sev.has(s) ? S.sev.delete(s) : S.sev.add(s); render();
+  });
+}
+
+function renderFindings(){
+  const list = findings.filter(f => S.sev.has(f.severity) && hostOk(f.host) && hit(f.title, f.cve, f.detail, f.host, f.port, f.category));
+  $("#fcount").textContent = `(${list.length})`;
+  $("#findings").innerHTML = list.length ? list.map(f => `
+    <details class="f ${f.severity}">
+      <summary><span class="badge ${f.severity}">${LBL[f.severity]}</span><b>${esc(f.title)}</b><span class="muted mono">${esc(f.host)}:${f.port}</span></summary>
+      <div class="body">
+        <p>${esc(f.detail)}</p>
+        ${f.cve ? `<p><b>CVE:</b> <a href="https://nvd.nist.gov/vuln/detail/${encodeURIComponent(f.cve)}" target="_blank" rel="noopener noreferrer">${esc(f.cve)}</a></p>` : ""}
+        <p><b>Qué hacer:</b> ${esc(f.advice)}</p>
+      </div>
+    </details>`).join("") : `<p class="muted">No hay hallazgos con estos filtros.</p>`;
+}
+
+function renderPorts(){
+  $("#thead").innerHTML = COLS.map(([k,l]) =>
+    `<th data-k="${k}" ${S.key===k ? `aria-sort="${S.dir>0?"ascending":"descending"}"` : ""}>${l}</th>`).join("");
+  $("#thead").querySelectorAll("th").forEach(th => th.onclick = () => {
+    const k = th.dataset.k; S.dir = S.key === k ? -S.dir : 1; S.key = k; renderPorts();
+  });
+  const list = ports.filter(p => hostOk(p.host) && hit(p.host, p.port, p.service, p.product, p.banner))
+    .sort((a,b) => (a[S.key] > b[S.key] ? 1 : a[S.key] < b[S.key] ? -1 : 0) * S.dir);
+  $("#pcount").textContent = `(${list.length})`;
+  $("#ports").innerHTML = list.length ? list.map(p => `<tr>
+    <td>${esc(p.host)}</td><td class="mono">${p.port}/tcp</td><td>${esc(p.service)}</td>
+    <td>${esc(p.product) || '<span class="muted">sin identificar</span>'}</td><td>${esc(p.source)}</td>
+    <td class="bn mono" title="${esc(p.banner)}">${esc(p.banner.split("\n")[0])}</td></tr>`).join("")
+    : `<tr><td colspan="6" class="muted">No hay puertos abiertos con estos filtros.</td></tr>`;
+}
+
+function render(){ renderStrip(); renderFindings(); renderPorts(); }
+
+$("#q").oninput = e => { S.q = e.target.value.trim().toLowerCase(); renderFindings(); renderPorts(); };
+$("#host").onchange = e => { S.host = e.target.value; renderFindings(); renderPorts(); };
+$("#theme").onclick = () => {
+  const r = document.documentElement, dark = getComputedStyle(r).colorScheme === "dark";
+  r.dataset.theme = dark ? "light" : "dark";
+};
+$("#dl").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(D, null, 2)], {type:"application/json"}));
+  a.download = "cybershield-report.json"; a.click(); URL.revokeObjectURL(a.href);
+};
+renderHead(); render();
+</script>
+</body>
+</html>

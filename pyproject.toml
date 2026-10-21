@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cybershield-scanner"
+version = "1.0.0"
+description = "Escáner multihilo de puertos y versiones obsoletas con reportes HTML/JSON"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+nmap = ["python-nmap>=0.7.1"]
+
+[project.scripts]
+cybershield = "cybershield.cli:main"
+
+[tool.setuptools]
+packages = ["cybershield"]

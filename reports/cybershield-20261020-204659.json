@@ -1,0 +1,91 @@
+{
+  "tool": "CyberShield Scanner",
+  "version": "1.0.0",
+  "generated_at": "2026-10-20T23:46:59+00:00",
+  "scan": {
+    "threads": 200,
+    "timeout_s": 1.0,
+    "duration_s": 2.33,
+    "nmap": true,
+    "interrupted": false,
+    "targets": [
+      "scanme.nmap.org"
+    ],
+    "ports_scanned": 1024
+  },
+  "summary": {
+    "hosts": 1,
+    "hosts_with_open_ports": 1,
+    "open_ports": 2,
+    "findings": 2,
+    "by_severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 2,
+      "low": 0,
+      "info": 0
+    },
+    "max_risk_score": 16
+  },
+  "hosts": [
+    {
+      "host": "scanme.nmap.org",
+      "ip": "45.33.32.156",
+      "open_ports": [
+        {
+          "host": "scanme.nmap.org",
+          "ip": "45.33.32.156",
+          "port": 22,
+          "service": "ssh",
+          "banner": "SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13",
+          "components": [
+            {
+              "product": "OpenSSH",
+              "version": "6.6.1p1"
+            }
+          ],
+          "source": "socket"
+        },
+        {
+          "host": "scanme.nmap.org",
+          "ip": "45.33.32.156",
+          "port": 80,
+          "service": "http",
+          "banner": "HTTP/1.1 200 OK\r\nDate: Tue, 20 Oct 2026 23:46:57 GMT\r\nServer: Apache/2.4.7 (Ubuntu)\r\nAccept-Ranges: bytes\r\nVary: Accept-Encoding\r\nConnection: close\r\nContent-Type: text/html",
+          "components": [
+            {
+              "product": "Apache httpd",
+              "version": "2.4.7"
+            }
+          ],
+          "source": "socket"
+        }
+      ],
+      "findings": [
+        {
+          "host": "scanme.nmap.org",
+          "ip": "45.33.32.156",
+          "port": 22,
+          "severity": "medium",
+          "title": "OpenSSH obsoleto (sin soporte)",
+          "category": "versión",
+          "cve": "",
+          "detail": "Detectado OpenSSH 6.6.1p1 en 22/tcp.",
+          "advice": "Actualiza a una versión mantenida de OpenSSH."
+        },
+        {
+          "host": "scanme.nmap.org",
+          "ip": "45.33.32.156",
+          "port": 80,
+          "severity": "medium",
+          "title": "Apache httpd obsoleto con vulnerabilidades públicas conocidas",
+          "category": "versión",
+          "cve": "",
+          "detail": "Detectado Apache httpd 2.4.7 en 80/tcp.",
+          "advice": "Actualiza a la última versión estable 2.4.x."
+        }
+      ],
+      "risk_score": 16
+    }
+  ]
+}

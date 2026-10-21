@@ -1,0 +1,39 @@
+{
+  "tool": "CyberShield Scanner",
+  "version": "1.0.0",
+  "generated_at": "2026-10-20T23:46:56+00:00",
+  "scan": {
+    "threads": 100,
+    "timeout_s": 1.0,
+    "duration_s": 1.05,
+    "nmap": false,
+    "interrupted": false,
+    "targets": [
+      "192.168.1.10"
+    ],
+    "ports_scanned": 32
+  },
+  "summary": {
+    "hosts": 1,
+    "hosts_with_open_ports": 0,
+    "open_ports": 0,
+    "findings": 0,
+    "by_severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "info": 0
+    },
+    "max_risk_score": 0
+  },
+  "hosts": [
+    {
+      "host": "192.168.1.10",
+      "ip": "192.168.1.10",
+      "open_ports": [],
+      "findings": [],
+      "risk_score": 0
+    }
+  ]
+}
